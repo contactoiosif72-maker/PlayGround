@@ -22,6 +22,7 @@ export class Town3D {
     this.cops = new Map();
     this.piles = [];
     this.clock = 0;
+    this.lastPlayerPosition = null;
     this.build(shops, buildings, props);
     this.resize();
     addEventListener('resize', () => this.resize());
@@ -83,30 +84,32 @@ export class Town3D {
   }
 
   makeGround() {
-    this.box(this.root, 950, -23, 675, 2050, 46, 1510, M('#a8bb87'));
-    for (const [x,z,w,d,c] of [[150,300,240,150,'#afc28f'],[730,280,185,140,'#91ad78'],[1110,330,180,145,'#b9c48e'],[1545,335,195,160,'#a0b57f'],[330,830,230,145,'#9eb980'],[1500,820,250,150,'#92ad78'],[260,1150,200,125,'#b1c28e'],[1120,1160,230,120,'#9db57d'],[1720,1180,220,130,'#b6c38c']]) this.box(this.root,x,0,z,w,2,d,M(c));
-    for (const [x,z,w,d] of [[350,430,330,34],[950,430,420,34],[1580,430,370,34],[350,680,360,34],[1570,680,360,34],[365,1005,410,32],[1510,1005,410,32]]) this.box(this.root,x,1,z,w,4,d,M('#d4c9ad'));
+    // Keep the walkable surface at y=0 so characters sit on top instead of being buried.
+    // A lower backing plane prevents z-fighting with the walkable surface details.
+    this.box(this.root, 950, -2, 675, 2050, 1, 1510, M('#a8bb87'));
+    for (const [x,z,w,d,c] of [[150,300,240,150,'#afc28f'],[730,280,185,140,'#91ad78'],[1110,330,180,145,'#b9c48e'],[1545,335,195,160,'#a0b57f'],[330,830,230,145,'#9eb980'],[1500,820,250,150,'#92ad78'],[260,1150,200,125,'#b1c28e'],[1120,1160,230,120,'#9db57d'],[1720,1180,220,130,'#b6c38c']]) this.box(this.root,x,-1,z,w,1,d,M(c));
+    for (const [x,z,w,d] of [[350,430,330,34],[950,430,420,34],[1580,430,370,34],[350,680,360,34],[1570,680,360,34],[365,1005,410,32],[1510,1005,410,32]]) this.box(this.root,x,-1,z,w,1,d,M('#d4c9ad'));
   }
 
   makeRoads() {
     const asphalt=M('#777c78'), curb=M('#d6d0bb'), paint=M('#eee3c5');
-    this.box(this.root,950,1,557,2050,8,225,asphalt);
-    for(const x of [515,1330]) this.box(this.root,x,1,675,155,8,1510,asphalt);
-    for(const [x,z,w,d] of [[950,438,2050,10],[950,676,2050,10],[436,675,10,1510],[594,675,10,1510],[1251,675,10,1510],[1409,675,10,1510]]) this.box(this.root,x,7,z,w,8,d,curb);
-    this.box(this.root,950,10,557,2050,1,5,paint);
-    for(const x of [515,1330]) this.box(this.root,x,10,675,4,1,1510,paint);
-    for(let x=35;x<1900;x+=95)this.box(this.root,x,10,557,46,1,3,paint);
-    for(const x of [515,1330]) for(let z=28;z<1330;z+=95)this.box(this.root,x,10,z,3,1,42,paint);
-    for(const x of [515,1330])for(let i=-4;i<=4;i++)this.box(this.root,x+i*13,11,490,7,1,36,M('#f2ead5'));
-    for(const x of [220,287,760,827,1495,1562,1730]){this.box(this.root,x,10,466,2,1,42,paint);this.box(this.root,x+55,10,466,2,1,42,paint)}
-    this.box(this.root,950,8,458,2050,3,26,M('#d9d2bd'));
-    this.box(this.root,950,8,656,2050,3,26,M('#d9d2bd'));
+    this.box(this.root,950,-1,557,2050,1,225,asphalt);
+    for(const x of [515,1330]) this.box(this.root,x,-1,675,155,1,1510,asphalt);
+    for(const [x,z,w,d] of [[950,438,2050,10],[950,676,2050,10],[436,675,10,1510],[594,675,10,1510],[1251,675,10,1510],[1409,675,10,1510]]) this.box(this.root,x,0,z,w,3,d,curb);
+    this.box(this.root,950,0,557,2050,1,5,paint);
+    for(const x of [515,1330]) this.box(this.root,x,0,675,4,1,1510,paint);
+    for(let x=35;x<1900;x+=95)this.box(this.root,x,0,557,46,1,3,paint);
+    for(const x of [515,1330]) for(let z=28;z<1330;z+=95)this.box(this.root,x,0,z,3,1,42,paint);
+    for(const x of [515,1330])for(let i=-4;i<=4;i++)this.box(this.root,x+i*13,1,490,7,1,36,M('#f2ead5'));
+    for(const x of [220,287,760,827,1495,1562,1730]){this.box(this.root,x,0,466,2,1,42,paint);this.box(this.root,x+55,0,466,2,1,42,paint)}
+    this.box(this.root,950,0,458,2050,1,26,M('#d9d2bd'));
+    this.box(this.root,950,0,656,2050,1,26,M('#d9d2bd'));
   }
 
   makePark() {
-    this.box(this.root,990,1,850,390,9,300,M('#8fb47b'));
-    this.box(this.root,990,7,835,315,4,34,M('#d7c89e'));
-    this.box(this.root,990,7,875,42,4,220,M('#d7c89e'));
+    this.box(this.root,990,-1,850,390,1,300,M('#8fb47b'));
+    this.box(this.root,990,-1,835,315,1,34,M('#d7c89e'));
+    this.box(this.root,990,-1,875,42,1,220,M('#d7c89e'));
     const base=new THREE.Mesh(new THREE.CylinderGeometry(43,43,5,24),M('#d9cfb8'));base.position.set(1090,7,920);this.root.add(base);
     const bowl=new THREE.Mesh(new THREE.CylinderGeometry(27,30,12,24),M('#9caa9a'));bowl.position.set(1090,15,920);this.root.add(bowl);
     const water=new THREE.Mesh(new THREE.CylinderGeometry(22,22,2,24),M('#79b8b8'));water.position.set(1090,22,920);this.root.add(water);
@@ -235,15 +238,21 @@ export class Town3D {
   human(x,z,options={}) {
     const g=new THREE.Group();g.position.set(x,0,z);this.dynamic.add(g);
     const skin=M(options.skin||'#d8a57e'), clothes=M(options.clothes||'#587e67'), pants=M(options.pants||'#4b5260'), hair=M(options.hair||'#514137');
-    const torso=this.box(g,0,20,0,15,22,9,clothes);this.box(g,0,38,0,12,12,11,skin);
-    this.ball(g,0,47,0,8,9,8,skin,9);this.ball(g,0,54,0,8,4,8,hair,8);
-    this.box(g,-4,4,0,5,13,6,pants);this.box(g,4,4,0,5,13,6,pants);
-    this.box(g,-10,21,0,5,18,6,clothes);this.box(g,10,21,0,5,18,6,clothes);
-    if(options.apron){this.box(g,0,22,5,10,17,2,M(options.apron));this.box(g,0,38,5,8,2,2,M('#e5d7b6'))}
-    if(options.hat){this.ball(g,0,54,0,9,3,9,M(options.hat),8);this.box(g,0,53,6,13,2,6,M(options.hat))}
+    const torso=this.box(g,0,19,0,15,22,9,clothes);this.box(g,0,37,0,12,10,11,skin);
+    this.ball(g,0,46,0,8,9,8,skin,9);this.ball(g,0,53,0,8,4,8,hair,8);
+    const legs=[], arms=[];
+    for(const side of [-1,1]){
+      const leg=new THREE.Group();leg.position.set(side*4,15,0);g.add(leg);
+      this.box(leg,0,-14,0,5,15,6,pants);this.box(leg,0,-14,3,6,4,9,M('#413d38'));
+      legs.push(leg);
+      const arm=new THREE.Group();arm.position.set(side*9,34,0);g.add(arm);
+      this.box(arm,0,-16,0,5,18,6,clothes);this.ball(arm,0,-16,1,3,3,3,skin,7);arms.push(arm);
+    }
+    if(options.apron){this.box(g,0,21,5,10,17,2,M(options.apron));this.box(g,0,37,5,8,2,2,M('#e5d7b6'))}
+    if(options.hat){this.ball(g,0,53,0,9,3,9,M(options.hat),8);this.box(g,0,52,6,13,2,6,M(options.hat))}
     if(options.bag){this.box(g,-9,24,-3,8,11,6,M(options.bag))}
     if(options.phone){this.box(g,11,29,5,2,6,2,M('#282b29'))}
-    g.userData.torso=torso;g.userData.phase=Math.random()*Math.PI*2;g.userData.sway=options.sway||0;
+    g.userData.torso=torso;g.userData.arms=arms;g.userData.legs=legs;g.userData.phase=Math.random()*Math.PI*2;g.userData.sway=options.sway||0;
     return g;
   }
 
@@ -264,32 +273,44 @@ export class Town3D {
   }
 
   createHobo() {
-    const g=new THREE.Group();g.position.set(1056,1,837);g.rotation.y=-.32;this.dynamic.add(g);
-    const rag=M('#74634d'), pants=M('#514a40'), skin=M('#9b7055');
-    const body=this.box(g,0,8,0,32,12,14,rag);body.rotation.z=-.12;
-    this.ball(g,20,13,1,9,8,8,skin,9);this.ball(g,18,20,0,9,4,8,M('#493b32'),8);
-    this.box(g,-14,5,1,17,8,12,pants).rotation.z=.15;
-    this.box(g,-19,7,9,14,3,6,M('#81796a'));
-    this.box(g,-9,1,1,14,2,24,M('#887d68'));
-    this.box(g,-5,2,-17,30,3,20,M('#967f60'));
-    this.ball(g,1,4,15,4,3,4,M('#9e7042'),8);this.box(g,1,2,15,5,3,5,M('#977441'));
-    const cig=this.box(g,28,12,5,9,1,1,M('#e1d2b5'));cig.rotation.z=-.08;
-    this.ball(g,33,12,5,2,2,2,M('#ee7453'),7);
+    const g=new THREE.Group();g.position.set(1056,0,837);g.rotation.y=-.32;this.dynamic.add(g);
+    const rag=M('#8b7557'), pants=M('#514a40'), skin=M('#b48160'), dark=M('#493b32');
+    // Reclining full-body silhouette: legs, torso and head remain distinct above the ground.
+    const body=this.box(g,-1,5,0,34,14,17,rag);body.rotation.z=-.08;
+    this.box(g,-24,3,0,19,8,13,pants).rotation.z=.08;
+    this.box(g,-37,2,2,12,5,10,M('#67503e'));
+    this.box(g,-39,1,4,12,2,11,M('#342f2a'));
+    this.ball(g,22,14,2,10,9,9,skin,10);
+    this.ball(g,20,8,7,8,5,4,M('#78604b'),8);
+    this.ball(g,17,15,10,1.3,1.3,1.3,dark,7);
+    this.ball(g,25,15,10,1.3,1.3,1.3,dark,7);
+    this.ball(g,30,13,8,2,2,2,dark,7);
+    this.ball(g,21,23,1,10,4,9,M('#594638'),8);
+    this.box(g,23,20,6,14,3,7,M('#594638'));
+    const arm=this.ball(g,8,10,10,13,4,4,rag,8);arm.rotation.z=-.1;
+    this.ball(g,18,8,12,4,3,3,skin,8);
+    const cig=this.box(g,32,12,8,8,1,1,M('#e1d2b5'));cig.rotation.z=-.08;
+    this.ball(g,37,12,8,2,2,2,M('#ee7453'),7);
     const smoke=[];
-    for(let i=0;i<3;i++){const puff=this.ball(g,34+i*3,17+i*7,5,3+i*.7,3+i*.7,3+i*.7,new THREE.MeshStandardMaterial({color:'#dedbd0',transparent:true,opacity:.34,roughness:1}),8);smoke.push(puff)}
-    this.vendorSmoke=smoke;this.hobo=g;
-    this.label(g,'TÍO PACO · COMPRO BOTÍN',0,48,3,'#765c43');
+    for(let i=0;i<3;i++){const puff=this.ball(g,38+i*3,17+i*7,8,3+i*.7,3+i*.7,3+i*.7,new THREE.MeshStandardMaterial({color:'#dedbd0',transparent:true,opacity:.34,roughness:1}),8);smoke.push(puff)}
+    this.vendorSmoke=smoke;this.hobo=g;this.hoboBody=body;
   }
 
   makeDog() {
     const g=new THREE.Group();
     const fur=M('#9a704e'), light=M('#b9946e'), dark=M('#553b2b');
-    this.ball(g,-2,13,0,23,12,13,fur,12);this.ball(g,15,17,0,12,9,9,light,10);
-    this.ball(g,11,25,-5,5,10,4,dark,8);this.ball(g,20,25,-5,5,10,4,dark,8);
-    this.ball(g,25,17,2,3,3,3,M('#25251f'),8);this.ball(g,8,19,7,2,2,2,M('#25251f'),8);
+    const body=this.ball(g,-2,13,0,23,12,13,fur,12);
+    const head=new THREE.Group();head.position.set(14,17,0);g.add(head);
+    this.ball(head,0,0,0,12,9,9,light,10);
+    this.ball(head,-3,8,-5,5,8,4,dark,8);this.ball(head,5,8,-5,5,8,4,dark,8);
+    this.ball(head,2,2,7,2,2,2,M('#25251f'),8);this.ball(head,10,0,2,3,3,3,M('#25251f'),8);
     const tail=this.pole(g,-24,13,0,2,3,15,dark,8);tail.rotation.z=.7;
-    for(const x of [-14,3])this.box(g,x,0,0,4,10,5,dark);
-    g.userData.fur=fur;g.userData.light=light;g.userData.tail=tail;
+    const legs=[];
+    for(const x of [-14,7])for(const z of [-8,8]){
+      const leg=new THREE.Group();leg.position.set(x,9,z);g.add(leg);
+      this.box(leg,0,-9,0,4,9,5,dark);legs.push(leg);
+    }
+    g.userData.fur=fur;g.userData.light=light;g.userData.body=body;g.userData.head=head;g.userData.legs=legs;g.userData.tail=tail;
     return g;
   }
 
@@ -323,17 +344,37 @@ export class Town3D {
     const focusX=camera.x+viewport.width/2, focusZ=camera.y+viewport.height/2;
     this.camera.position.set(focusX,1450,focusZ+1250);this.camera.lookAt(focusX,0,focusZ);
     const at=(obj,x,z,y=0)=>{obj.position.set(x,y,z);};
+    let moveSpeed=0;
+    if(this.lastPlayerPosition&&dt>0){
+      moveSpeed=Math.hypot(player.x-this.lastPlayerPosition.x,player.y-this.lastPlayerPosition.y)/dt;
+    }
+    this.lastPlayerPosition={x:player.x,y:player.y};
+    const gait=Math.min(1,moveSpeed/105), gaitPhase=this.clock*15;
     at(this.dog,player.x,player.y,player.jumpHeight||0);this.dog.rotation.y=player.dir<0?Math.PI:0;
     this.dog.userData.fur.color.set(player.clean>0?'#d9b786':'#9a704e');
     this.dog.userData.light.color.set(player.clean>0?'#f0d9b0':'#b9946e');
-    this.dog.userData.tail.rotation.z=.7+Math.sin(this.clock*9)*.22;
+    this.dog.userData.body.position.y=13+Math.abs(Math.sin(gaitPhase))*1.5*gait;
+    this.dog.userData.head.rotation.z=Math.sin(gaitPhase+0.6)*.06*gait;
+    this.dog.userData.legs.forEach((leg,i)=>{
+      const diagonal=(i===0||i===3)?0:Math.PI;
+      leg.rotation.z=Math.sin(gaitPhase+diagonal)*.48*gait;
+    });
+    this.dog.userData.tail.rotation.z=.7+Math.sin(this.clock*9)*(.16+.22*gait);
     while(this.cops.size<cops.length){const mesh=this.addCop();this.dynamic.add(mesh);this.cops.set(this.cops.size,mesh)}
     for(let i=0;i<this.cops.size;i++){const mesh=this.cops.get(i),cop=cops[i];mesh.visible=!!cop;if(cop){at(mesh,cop.x,cop.y,0);mesh.userData.flash.material.color.set(this.clock%0.5<.25?'#fa6b62':'#6aa8fa')}}
     while(this.piles.length<piles.length)this.piles.push(this.addPoop());
     this.piles.forEach((mesh,i)=>{const p=piles[i];mesh.visible=!!p;if(p)at(mesh,p.x,p.y,0)});
     this.clock+=dt;
-    for(const person of this.residents){const mesh=person.mesh;mesh.position.y=Math.sin(this.clock*2+person.offset)*.65;if(person.kind==='passer')mesh.rotation.y=Math.sin(this.clock*.65+person.offset)*.22}
-    this.hobo.rotation.z=Math.sin(this.clock*1.6)*.035;
+    for(const person of this.residents){
+      const mesh=person.mesh, phase=this.clock*6+person.offset, walking=person.kind==='passer';
+      mesh.position.y=Math.sin(phase)*.18;
+      mesh.userData.legs.forEach((leg,i)=>{leg.rotation.z=Math.sin(phase+(i?Math.PI:0))*(walking?.34:.045)});
+      mesh.userData.arms.forEach((arm,i)=>{arm.rotation.z=Math.sin(phase+(i?0:Math.PI))*(walking?.24:.055)});
+      mesh.rotation.z=Math.sin(phase)*.018;
+      if(walking)mesh.rotation.y=Math.sin(this.clock*.65+person.offset)*.22;
+    }
+    this.hobo.rotation.z=Math.sin(this.clock*1.6)*.025;
+    this.hoboBody.scale.y=1+Math.sin(this.clock*1.8)*.012;
     this.vendorSmoke.forEach((p,i)=>{const t=(this.clock*1.1+i*.36)%1;p.position.y=17+i*7+t*23;p.position.x=34+i*3+Math.sin(this.clock*2+i)*3;p.material.opacity=.3*(1-t);p.scale.setScalar(.7+t*.7)});
     this.renderer.render(this.scene,this.camera);
   }
