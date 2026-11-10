@@ -1,6 +1,8 @@
+import { Town3D } from './town3d.js';
+
 (() => {
   const canvas = document.querySelector('#game');
-  const ctx = canvas.getContext('2d');
+  const ctx = document.createElement('canvas').getContext('2d');
   const cashEl = document.querySelector('#cash');
   const lootEl = document.querySelector('#loot');
   const cleanEl = document.querySelector('#clean');
@@ -28,10 +30,13 @@
   const poopPiles = [];
   const props = [];
   for(let i=0;i<34;i++) props.push({x:80+(i*193)%1740,y:145+(i*277)%1080,r:10+(i*7)%12,type:i%3});
-  let running=false, last=performance.now(), camera={x:0,y:0}, toastTimer=0, wanted=0, alertTimer=0, robberyCount=0, showered=false, won=false, elapsed=0, poopRegen=0;
+  let running=false, last=performance.now(), camera={x:0,y:0}, toastTimer=0, wanted=0, alertTimer=0, robberyCount=0, showered=false, won=false, elapsed=0, poopRegen=0, arresting=false, arrestTimer=0;
   let canvasW=innerWidth,canvasH=innerHeight,dpr=1;
   function resize(){dpr=Math.min(devicePixelRatio||1,2);canvasW=canvas.clientWidth;canvasH=canvas.clientHeight;canvas.width=Math.floor(canvasW*dpr);canvas.height=Math.floor(canvasH*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
   addEventListener('resize',resize);resize();
+  let town;
+  try { town = new Town3D(canvas,shops,buildings,props); }
+  catch (error) { console.error('No se pudo iniciar el mapa 3D:',error); }
   function toast(text){toastEl.textContent=text;toastEl.classList.add('show');toastTimer=2.25}
   function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
   function closestTarget(){let list=[...shops.map(o=>({...o,kind:'shop',obj:o})),...vendors.map(o=>({...o,r:35,obj:o}))];let near=list.map(o=>({o,d:Math.hypot(player.x-(o.kind==='shop'?o.x+o.w/2:o.x),player.y-(o.kind==='shop'?o.y+o.h/2:o.y))})).filter(a=>a.d<(a.o.kind==='shop'?Math.hypot(a.o.w/2,a.o.h/2)+40:65)).sort((a,b)=>a.d-b.d);return near[0]?.o}
@@ -70,14 +75,16 @@
   document.querySelectorAll('[data-dir]').forEach(b=>{const d=b.dataset.dir;const down=e=>{e.preventDefault();held.add(d)};const up=e=>{e.preventDefault();held.delete(d)};b.addEventListener('pointerdown',down);['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,up))});
   document.querySelector('#touchInteract').addEventListener('pointerdown',e=>{e.preventDefault();interact()});document.querySelector('#touchPoop').addEventListener('pointerdown',e=>{e.preventDefault();poop()});
   function collides(x,y){return buildings.some(b=>x+player.r>b.x&&x-player.r<b.x+b.w&&y+player.r>b.y&&y-player.r<b.y+b.h)}
-  function update(dt){elapsed+=dt;if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)toastEl.classList.remove('show')}
+  function beginArrest(){arresting=true;arrestTimer=0;const lost=player.loot.length;player.loot=[];wanted=0;alertTimer=0;cops.length=0;document.querySelector('#arrestText').textContent=lost?`El agente te esposa y confisca tus ${lost} objetos de botín.`:'El agente te esposa y te lleva a dar una vuelta por comisaría.';document.querySelector('#arrestTitle').textContent='¡TE PILLARON!';document.querySelector('#arrest').classList.remove('hidden');updateHud()}
+  function finishArrest(){arresting=false;document.querySelector('#arrest').classList.add('hidden');player.x=990;player.y=900;player.dir=1;player.invuln=2;camera.x=Math.max(0,Math.min(W-canvasW,player.x-canvasW/2));camera.y=Math.max(0,Math.min(H-canvasH,player.y-canvasH/2));updateHud();toast('¡Libre! Chucho reaparece en el parque. ¡A seguir!')}
+  function update(dt){if(arresting){arrestTimer+=dt;if(arrestTimer>=1.55&&document.querySelector('#arrestTitle').textContent==='¡TE PILLARON!'){document.querySelector('#arrestTitle').textContent='RUMBO A COMISARÍA';document.querySelector('#arrestText').textContent='Un ratito después, Chucho vuelve al barrio...'}if(arrestTimer>=3.8)finishArrest();return}elapsed+=dt;if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)toastEl.classList.remove('show')}
     player.poopWait=Math.max(0,player.poopWait-dt);player.invuln=Math.max(0,player.invuln-dt);if(player.poops<2){poopRegen+=dt;if(poopRegen>=18){player.poops++;poopRegen=0;updateHud()}}
     let dx=0,dy=0;if(keys.has('w')||keys.has('arrowup')||held.has('up'))dy--;if(keys.has('s')||keys.has('arrowdown')||held.has('down'))dy++;if(keys.has('a')||keys.has('arrowleft')||held.has('left'))dx--;if(keys.has('d')||keys.has('arrowright')||held.has('right'))dx++;
     if(dx||dy){const n=Math.hypot(dx,dy);dx/=n;dy/=n;player.dir=dx<0?-1:dx>0?1:player.dir;let nx=Math.max(22,Math.min(W-22,player.x+dx*player.speed*dt)),ny=Math.max(110,Math.min(H-22,player.y+dy*player.speed*dt));if(!collides(nx,player.y))player.x=nx;if(!collides(player.x,ny))player.y=ny}
     for(const p of poopPiles)p.life-=dt;while(poopPiles.length&&poopPiles[0].life<=0)poopPiles.shift();
     if(alertTimer>0){alertTimer-=dt;wanted=Math.max(0,wanted-dt*3.1)}else if(cops.length)wanted=Math.max(0,wanted-dt*5.2);
     for(let i=cops.length-1;i>=0;i--){const c=cops[i];if(c.distract>0){c.distract-=dt;let p=poopPiles.reduce((a,b)=>!a||dist(b,c)<dist(a,c)?b:a,null);if(p){let a=Math.atan2(p.y-c.y,p.x-c.x);c.x+=Math.cos(a)*c.speed*.72*dt;c.y+=Math.sin(a)*c.speed*.72*dt}continue}
-      const d=dist(c,player);if(d>760&&alertTimer<=0){cops.splice(i,1);continue}if(d<20&&player.invuln<=0){player.x=Math.max(30,Math.min(W-30,player.x+(player.x-c.x)*.18));player.y=Math.max(120,Math.min(H-30,player.y+(player.y-c.y)*.18));player.loot=[];player.invuln=1.5;alertTimer=0;wanted=Math.max(0,wanted-40);toast('¡Te pillaron! Perdiste el botín, pero lograste escapar.');updateHud()}
+      const d=dist(c,player);if(d>760&&alertTimer<=0){cops.splice(i,1);continue}if(d<20&&player.invuln<=0){beginArrest();return}
       else{const a=Math.atan2(player.y-c.y,player.x-c.x),speed=c.speed*(c.distract?0.7:1);c.x+=Math.cos(a)*speed*dt;c.y+=Math.sin(a)*speed*dt}
     }
     const t=closestTarget();if(t&&Math.random()<dt*.08){const label=t.kind==='shop'?`E · HUSMEAR EN ${t.name}`:t.kind==='vendor'?'E · VENDER BOTÍN A TÍO PACO':'E · DUCHA Y ARREGLO';toast(label)}
@@ -116,6 +123,10 @@
     const t=closestTarget();if(t){let x=t.kind==='shop'?t.x+t.w/2:t.x,y=t.kind==='shop'?t.y-13:t.y-58;const label=t.kind==='shop'?'E · ROBAR':t.kind==='vendor'?'E · VENDER':'E · BAÑARSE';ctx.font='700 11px "DM Mono", monospace';let w=ctx.measureText(label).width+18;roundRect(x-w/2,y-19,w,25,7,'#18251eeF','#d2f36b');text(label,x,y-2,10,'#e8f4ca','700')}
     ctx.restore();
   }
-  function frame(now){if(!running)return;let dt=Math.min(.04,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(frame)}
-  draw();updateHud();
+  function render(){
+    if(town){town.sync({player,cops,piles:poopPiles,camera,viewport:{width:canvasW,height:canvasH},dt:0});return}
+    draw();
+  }
+  function frame(now){if(!running)return;let dt=Math.min(.04,(now-last)/1000);last=now;update(dt);if(town)town.sync({player,cops,piles:poopPiles,camera,viewport:{width:canvasW,height:canvasH},dt});else draw();requestAnimationFrame(frame)}
+  render();updateHud();
 })();

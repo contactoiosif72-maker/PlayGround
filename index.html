@@ -47,10 +47,20 @@
         <button class="primary" id="backBtn">¡ENTENDIDO!</button>
       </section>
     </div>
+    <div class="overlay hidden" id="arrest">
+      <section class="arrest-scene" aria-live="assertive">
+        <div class="arrest-lights"><i></i><i></i></div>
+        <div class="arrest-action"><span class="arrest-cop">👮</span><span class="arrest-dog">🐕</span><span class="cuffs">⛓️</span></div>
+        <div class="eyebrow">UN MOMENTO, CHUCHO...</div>
+        <h2 id="arrestTitle">¡TE PILLARON!</h2>
+        <p id="arrestText">El agente te pone las esposas y confisca el botín.</p>
+        <div class="arrest-progress"><i></i></div>
+      </section>
+    </div>
     <div class="overlay hidden" id="win">
       <section class="card win-card"><div class="eyebrow">¡LEYENDA DEL BARRIO!</div><h1>De callejero<br>a <em>señor perro.</em></h1><p>Chucho luce impecable, tiene la cartera llena y ya nadie le confunde con un felpudo.</p><div class="win-stats" id="winStats"></div><button class="primary" id="keepPlaying">SEGUIR PASEANDO <span>→</span></button></section>
     </div>
   </main>
-  <script src="game.js"></script>
+  <script type="module" src="game.js"></script>
 </body>
 </html>
