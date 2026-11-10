@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#18251f" />
+  <title>Chucho: La vida es dura</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game-shell">
+    <canvas id="game" aria-label="Juego de aventura urbana de Chucho"></canvas>
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon">🐕</span><div><b>CHUCHO</b><small>LA VIDA ES DURA</small></div></div>
+      <div class="stats">
+        <div class="stat cash"><span>🪙</span><b id="cash">0</b><small>MONEDAS</small></div>
+        <div class="stat loot"><span>🎒</span><b id="loot">0</b><small>BOTÍN</small></div>
+        <div class="stat clean"><span>🫧</span><b id="clean">0</b><small>ASEO</small></div>
+        <div class="wanted" id="wanted"><span>🚨</span><div><b>BUSCADO</b><div class="wanted-bar"><i id="wantedFill"></i></div></div></div>
+      </div>
+      <button class="help-btn" id="helpBtn" aria-label="Ayuda">?</button>
+    </header>
+    <div class="mission" id="mission"><span>★</span> Junta <b>60 monedas</b> para convertirte en el perro más elegante del barrio.</div>
+    <div class="toast" id="toast" aria-live="polite"></div>
+    <div class="controls-hint"><span>WASD / ↑↓←→</span> moverse <i>·</i> <span>E</span> interactuar <i>·</i> <span>ESPACIO</span> dejar recuerdo</div>
+    <div class="touch-controls" aria-label="Controles táctiles">
+      <div class="dpad"><button data-dir="up">▲</button><div><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div></div>
+      <div class="touch-actions"><button id="touchInteract">E<br><small>USAR</small></button><button id="touchPoop">💩 <b id="poops">2</b><br><small>¡PLOP!</small></button></div>
+    </div>
+    <div class="overlay" id="intro">
+      <section class="card intro-card">
+        <div class="eyebrow">UNA HISTORIA DE SUPERACIÓN (MÁS O MENOS)</div>
+        <h1>La calle es<br><em>tu territorio.</em></h1>
+        <p>Eres Chucho, un perro callejero con grandes sueños y cero monedas. Husmea en los negocios, vende lo que encuentres al vendedor de la esquina y escapa de la poli.</p>
+        <div class="howto"><span>🐾 Roba en tiendas</span><span>🛒 Vende el botín</span><span>🛁 Date un baño</span></div>
+        <button class="primary" id="startBtn">SALIR A LA CALLE <span>→</span></button>
+        <small class="fineprint">Consejo: una cagadita a tiempo distrae a los agentes. No preguntes cómo.</small>
+      </section>
+    </div>
+    <div class="overlay hidden" id="help">
+      <section class="card help-card"><button class="close" id="closeHelp">×</button><div class="eyebrow">GUÍA DE SUPERVIVENCIA</div><h2>¿Cómo se vive aquí?</h2>
+        <p><b>Muévete</b> con WASD o las flechas. En móvil, usa la cruceta.</p>
+        <p><b>Roba</b> acercándote a una tienda y pulsando E. Cada robo llena la mochila y pone a la poli tras tus patas.</p>
+        <p><b>Vende</b> el botín al vendedor junto al puesto del parque. La mochila vacía, los bolsillos llenos.</p>
+        <p><b>Arréglate</b> en la estación de lavado. Un buen baño mejora tu aspecto y te da más velocidad.</p>
+        <p><b>¡PLOP!</b> Espacio deja una cagadita. Si hay un agente cerca, se distrae. La ciudad te lo agradece (bueno, no).</p>
+        <button class="primary" id="backBtn">¡ENTENDIDO!</button>
+      </section>
+    </div>
+    <div class="overlay hidden" id="win">
+      <section class="card win-card"><div class="eyebrow">¡LEYENDA DEL BARRIO!</div><h1>De callejero<br>a <em>señor perro.</em></h1><p>Chucho luce impecable, tiene la cartera llena y ya nadie le confunde con un felpudo.</p><div class="win-stats" id="winStats"></div><button class="primary" id="keepPlaying">SEGUIR PASEANDO <span>→</span></button></section>
+    </div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
