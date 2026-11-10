@@ -22,10 +22,15 @@
     </header>
     <div class="mission" id="mission"><span>★</span> Junta <b>60 monedas</b> para convertirte en el perro más elegante del barrio.</div>
     <div class="toast" id="toast" aria-live="polite"></div>
-    <div class="controls-hint"><span>WASD / ↑↓←→</span> moverse <i>·</i> <span>E</span> interactuar <i>·</i> <span>ESPACIO</span> dejar recuerdo</div>
+    <div class="controls-hint"><span>WASD / ↑↓←→</span> moverse <i>·</i> <span>J</span> saltar <i>·</i> <span>SHIFT</span> correr <i>·</i> <span>E</span> interactuar <i>·</i> <span>ESPACIO</span> ¡plop!</div>
     <div class="touch-controls" aria-label="Controles táctiles">
-      <div class="dpad"><button data-dir="up">▲</button><div><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div></div>
-      <div class="touch-actions"><button id="touchInteract">E<br><small>USAR</small></button><button id="touchPoop">💩 <b id="poops">2</b><br><small>¡PLOP!</small></button></div>
+      <div class="joystick" id="joystick" role="application" aria-label="Joystick: desliza el círculo para moverte"><div class="joystick-ring"><div class="joystick-knob" id="joystickKnob"></div></div></div>
+      <div class="touch-actions">
+        <button id="touchInteract" aria-label="Usar o interactuar">E<br><small>USAR</small></button>
+        <button id="touchPoop" aria-label="Dejar recuerdo">💩 <b id="poops">2</b><br><small>¡PLOP!</small></button>
+        <button id="touchJump" aria-label="Saltar">↟<br><small>SALTAR</small></button>
+        <button id="touchRun" aria-label="Mantener para correr">»<br><small>CORRER</small></button>
+      </div>
     </div>
     <div class="overlay" id="intro">
       <section class="card intro-card">
@@ -39,7 +44,7 @@
     </div>
     <div class="overlay hidden" id="help">
       <section class="card help-card"><button class="close" id="closeHelp">×</button><div class="eyebrow">GUÍA DE SUPERVIVENCIA</div><h2>¿Cómo se vive aquí?</h2>
-        <p><b>Muévete</b> con WASD o las flechas. En móvil, usa la cruceta.</p>
+        <p><b>Muévete</b> con WASD o las flechas. En móvil, desliza el joystick. Pulsa J para saltar y mantén Shift para correr; en móvil, usa los botones.</p>
         <p><b>Roba</b> acercándote a una tienda y pulsando E. Cada robo llena la mochila y pone a la poli tras tus patas.</p>
         <p><b>Vende</b> el botín al vendedor junto al puesto del parque. La mochila vacía, los bolsillos llenos.</p>
         <p><b>Arréglate</b> en la estación de lavado. Un buen baño mejora tu aspecto y te da más velocidad.</p>
