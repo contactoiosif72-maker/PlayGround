@@ -9,7 +9,9 @@ export class Town3D {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#a9c7d0');
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 6000);
@@ -27,6 +29,8 @@ export class Town3D {
 
   box(parent, x, y, z, w, h, d, material) {
     const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+    o.castShadow = true;
+    o.receiveShadow = true;
     o.position.set(x, y + h / 2, z);
     parent.add(o);
     return o;
@@ -34,11 +38,15 @@ export class Town3D {
 
   ball(parent, x, y, z, sx, sy, sz, material, segments = 10) {
     const o = new THREE.Mesh(new THREE.SphereGeometry(1, segments, 7), material);
+    o.castShadow = true;
+    o.receiveShadow = true;
     o.position.set(x, y, z); o.scale.set(sx, sy, sz); parent.add(o); return o;
   }
 
   pole(parent, x, y, z, rt, rb, h, material, sides = 9) {
     const o = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, sides), material);
+    o.castShadow = true;
+    o.receiveShadow = true;
     o.position.set(x, y + h / 2, z); parent.add(o); return o;
   }
 
@@ -52,8 +60,22 @@ export class Town3D {
   }
 
   build(shops, buildings, props) {
-    this.scene.add(new THREE.HemisphereLight('#f5f7df', '#657358', 2.1));
-    const sun = new THREE.DirectionalLight('#fff0d3', 3.2); sun.position.set(-500, 1400, 700); this.scene.add(sun);
+    this.scene.add(new THREE.HemisphereLight('#f5f7df', '#657358', 1.45));
+    const sun = new THREE.DirectionalLight('#fff0d3', 2.5);
+    sun.position.set(-500, 1400, 700);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -1250;
+    sun.shadow.camera.right = 1250;
+    sun.shadow.camera.top = 1050;
+    sun.shadow.camera.bottom = -1050;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 3600;
+    sun.shadow.normalBias = 0.035;
+    sun.shadow.bias = -0.00008;
+    sun.shadow.radius = 3;
+    sun.shadow.camera.updateProjectionMatrix();
+    this.scene.add(sun);
     this.makeGround(); this.makeRoads(); this.makePark();
     this.makeBuildings(shops, buildings); this.makeTrees(props, buildings);
     this.makeStreetLife(); this.makeResidents();
