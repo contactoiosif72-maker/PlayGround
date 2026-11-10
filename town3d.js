@@ -301,7 +301,7 @@ export class Town3D {
     const focusX=camera.x+viewport.width/2, focusZ=camera.y+viewport.height/2;
     this.camera.position.set(focusX,1450,focusZ+1250);this.camera.lookAt(focusX,0,focusZ);
     const at=(obj,x,z,y=0)=>{obj.position.set(x,y,z);};
-    at(this.dog,player.x,player.y,0);this.dog.rotation.y=player.dir<0?Math.PI:0;
+    at(this.dog,player.x,player.y,player.jumpHeight||0);this.dog.rotation.y=player.dir<0?Math.PI:0;
     this.dog.userData.fur.color.set(player.clean>0?'#d9b786':'#9a704e');
     this.dog.userData.light.color.set(player.clean>0?'#f0d9b0':'#b9946e');
     this.dog.userData.tail.rotation.z=.7+Math.sin(this.clock*9)*.22;
